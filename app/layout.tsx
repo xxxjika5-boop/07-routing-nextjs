@@ -8,7 +8,13 @@ export const metadata = {
   description: "Next.js NoteHub Application",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+  modal,
+}: {
+  children: React.ReactNode;
+  modal: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body>
@@ -17,10 +23,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           {children}
 
+          {modal}
+
           <Footer />
         </TanStackProvider>
 
-        {}
         <div id="modal-root"></div>
       </body>
     </html>

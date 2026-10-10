@@ -6,14 +6,22 @@ import { useDebounce } from "use-debounce";
 import { fetchNotes } from "@/lib/api";
 
 import NoteList from "@/components/NoteList/NoteList";
-import SearchBox, { SearchBoxRef } from "@/components/SearchBox/SearchBox";
+import SearchBox, {
+  SearchBoxRef,
+} from "@/components/SearchBox/SearchBox";
 import Pagination from "@/components/Pagination/Pagination";
 import Modal from "@/components/Modal/Modal";
 import NoteForm from "@/components/NoteForm/NoteForm";
 
 import css from "./Notes.module.css";
 
-export default function NotesClient() {
+interface NotesClientProps {
+  tag?: string;
+}
+
+export default function NotesClient({
+  tag,
+}: NotesClientProps) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,8 +31,13 @@ export default function NotesClient() {
   const [debouncedSearch] = useDebounce(search, 300);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["notes", page, debouncedSearch],
-    queryFn: () => fetchNotes({ search: debouncedSearch, page }),
+    queryKey: ["notes", page, debouncedSearch, tag],
+    queryFn: () =>
+      fetchNotes({
+        search: debouncedSearch,
+        page,
+        tag,
+      }),
     placeholderData: (prev) => prev,
   });
 
@@ -33,14 +46,22 @@ export default function NotesClient() {
     setPage(1);
   };
 
-  if (isLoading) return <p>Loading, please wait...</p>;
-  if (isError) return <p>Something went wrong.</p>;
+  if (isLoading) {
+    return <p>Loading, please wait...</p>;
+  }
+
+  if (isError) {
+    return <p>Something went wrong.</p>;
+  }
 
   return (
     <main className={css.main}>
       <div className={css.container}>
         <div className={css.actions}>
-          <SearchBox ref={searchRef} onChange={handleSearchChange} />
+          <SearchBox
+            ref={searchRef}
+            onChange={handleSearchChange}
+          />
 
           {(data?.totalPages ?? 1) > 1 && (
             <Pagination
@@ -48,7 +69,7 @@ export default function NotesClient() {
               totalPages={data?.totalPages ?? 1}
               onPageChange={setPage}
             />
-      )}
+          )}
 
           <button
             className={css.createButton}
@@ -62,7 +83,9 @@ export default function NotesClient() {
 
         {isModalOpen && (
           <Modal onClose={() => setIsModalOpen(false)}>
-            <NoteForm onSuccess={() => setIsModalOpen(false)} />
+            <NoteForm
+              onSuccess={() => setIsModalOpen(false)}
+            />
           </Modal>
         )}
       </div>
